@@ -1608,13 +1608,18 @@ public class Manager : ArmchairManager {
                 }
             }
 
-            for subView in window.subviews {
+            var queuedSubviews = [UIView]()
+            queuedSubviews.appendContentsOf(window.subviews)
+    
+            while !queuedSubviews.isEmpty {
+                let subView = queuedSubviews.removeFirst()
                 if let responder = subView.nextResponder() {
                     if responder.isKindOfClass(UIViewController) {
                         return topMostViewController(responder as? UIViewController)
                     }
 
                 }
+                queuedSubviews.appendContentsOf(subView.subviews)
             }
         }
 

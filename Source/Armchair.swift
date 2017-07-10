@@ -463,7 +463,7 @@ public func resetDefaults() {
  * rating alert will simply be postponed until it is called again with true for
  * canPromptForRating.
  */
-public func userDidSignificantEvent(by presentingController: UIViewController?, canPromptForRating: Bool) {
+public func userDidSignificantEvent(by presentingController: UIViewController? = nil, canPromptForRating: Bool) {
     Manager.defaultManager.userDidSignificantEvent(presentingBy: presentingController, canPromptForRating: canPromptForRating)
 }
 
@@ -482,7 +482,7 @@ public func userDidSignificantEvent(by presentingController: UIViewController?, 
  * The closure is run synchronous and on the main queue, so be sure to handle it appropriately.
  * Return true to proceed and show the prompt, return false to kill the pending presentation.
  */
-public func userDidSignificantEvent(by presentingController: UIViewController?, shouldPrompt: @escaping ArmchairShouldPromptClosure) {
+public func userDidSignificantEvent(by presentingController: UIViewController? = nil, shouldPrompt: @escaping ArmchairShouldPromptClosure) {
     Manager.defaultManager.userDidSignificantEvent(presentingBy: presentingController, shouldPrompt: shouldPrompt)
 }
 
@@ -497,7 +497,7 @@ public func userDidSignificantEvent(by presentingController: UIViewController?, 
  * for instance, in the case of some special event in your app.
  */
 
-public func showPrompt(by presentingController: UIViewController?) {
+public func showPrompt(by presentingController: UIViewController? = nil) {
     Manager.defaultManager.showPrompt(by: presentingController)
 }
 
@@ -509,7 +509,7 @@ public func showPrompt(by presentingController: UIViewController?) {
  * You could call to show the prompt, for instance, in the case of some special event in your app,
  * like a user login.
  */
-public func showPromptIfNecessary(by presentingController: UIViewController?) {
+public func showPromptIfNecessary(by presentingController: UIViewController? = nil) {
     Manager.defaultManager.showPrompt(by: presentingController, ifNecessary: true)
 }
 
@@ -524,7 +524,7 @@ public func showPromptIfNecessary(by presentingController: UIViewController?) {
  * The closure is run synchronous and on the main queue, so be sure to handle it appropriately.
  * Return true to proceed and show the prompt, return false to kill the pending presentation.
  */
-public func showPrompt(by presentingController: UIViewController?, shouldPrompt: ArmchairShouldPromptClosure) {
+public func showPrompt(by presentingController: UIViewController? = nil, shouldPrompt: ArmchairShouldPromptClosure) {
     Manager.defaultManager.showPrompt(by: presentingController, shouldPrompt: shouldPrompt)
 }
 

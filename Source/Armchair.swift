@@ -463,8 +463,8 @@ public func resetDefaults() {
  * rating alert will simply be postponed until it is called again with true for
  * canPromptForRating.
  */
-public func userDidSignificantEvent(_ canPromptForRating: Bool) {
-    Manager.defaultManager.userDidSignificantEvent(canPromptForRating)
+public func userDidSignificantEvent(by presentingController: UIViewController?, canPromptForRating: Bool) {
+    Manager.defaultManager.userDidSignificantEvent(presentingBy: presentingController, canPromptForRating: canPromptForRating)
 }
 
 /*
@@ -482,8 +482,8 @@ public func userDidSignificantEvent(_ canPromptForRating: Bool) {
  * The closure is run synchronous and on the main queue, so be sure to handle it appropriately.
  * Return true to proceed and show the prompt, return false to kill the pending presentation.
  */
-public func userDidSignificantEvent(_ shouldPrompt: @escaping ArmchairShouldPromptClosure) {
-    Manager.defaultManager.userDidSignificantEvent(shouldPrompt)
+public func userDidSignificantEvent(by presentingController: UIViewController?, shouldPrompt: @escaping ArmchairShouldPromptClosure) {
+    Manager.defaultManager.userDidSignificantEvent(presentingBy: presentingController, shouldPrompt: shouldPrompt)
 }
 
 // MARK: Prompts
@@ -497,8 +497,8 @@ public func userDidSignificantEvent(_ shouldPrompt: @escaping ArmchairShouldProm
  * for instance, in the case of some special event in your app.
  */
 
-public func showPrompt() {
-    Manager.defaultManager.showPrompt()
+public func showPrompt(by presentingController: UIViewController?) {
+    Manager.defaultManager.showPrompt(by: presentingController)
 }
 
 /*
@@ -509,8 +509,8 @@ public func showPrompt() {
  * You could call to show the prompt, for instance, in the case of some special event in your app,
  * like a user login.
  */
-public func showPromptIfNecessary() {
-    Manager.defaultManager.showPrompt(ifNecessary: true)
+public func showPromptIfNecessary(by presentingController: UIViewController?) {
+    Manager.defaultManager.showPrompt(by: presentingController, ifNecessary: true)
 }
 
 /*
@@ -524,8 +524,8 @@ public func showPromptIfNecessary() {
  * The closure is run synchronous and on the main queue, so be sure to handle it appropriately.
  * Return true to proceed and show the prompt, return false to kill the pending presentation.
  */
-public func showPrompt(_ shouldPrompt: ArmchairShouldPromptClosure) {
-    Manager.defaultManager.showPrompt(shouldPrompt)
+public func showPrompt(by presentingController: UIViewController?, shouldPrompt: ArmchairShouldPromptClosure) {
+    Manager.defaultManager.showPrompt(by: presentingController, shouldPrompt: shouldPrompt)
 }
 
 /**
@@ -959,43 +959,43 @@ open class Manager : ArmchairManager {
     // MARK: -
     // MARK: PRIVATE Methods
     
-    fileprivate func userDidSignificantEvent(_ canPromptForRating: Bool) {
+    fileprivate func userDidSignificantEvent(presentingBy presentingController: UIViewController?, canPromptForRating: Bool) {
         DispatchQueue.global(qos: .background).async {
-            self.incrementSignificantEventAndRate(canPromptForRating)
+            self.incrementSignificantEventAndRate(presentingBy: presentingController, canPromptForRating: canPromptForRating)
         }
     }
     
-    fileprivate func userDidSignificantEvent(_ shouldPrompt: @escaping ArmchairShouldPromptClosure) {
+    fileprivate func userDidSignificantEvent(presentingBy presentingController: UIViewController?, shouldPrompt: @escaping ArmchairShouldPromptClosure) {
         DispatchQueue.global(qos: .background).async {
-            self.incrementSignificantEventAndRate(shouldPrompt)
+            self.incrementSignificantEventAndRate(presentingBy: presentingController, shouldPrompt: shouldPrompt)
         }
     }
     
     // MARK: -
     // MARK: PRIVATE Rating Helpers
     
-    fileprivate func incrementAndRate(_ canPromptForRating: Bool) {
+    fileprivate func incrementAndRate(presentingBy presentingController: UIViewController?, canPromptForRating: Bool) {
         migrateKeysIfNecessary()
         incrementUseCount()
-        showPrompt(ifNecessary: canPromptForRating)
+        showPrompt(by: presentingController, ifNecessary: canPromptForRating)
     }
     
-    fileprivate func incrementAndRate(_ shouldPrompt: ArmchairShouldPromptClosure) {
+    fileprivate func incrementAndRate(presentingBy presentingController: UIViewController?, shouldPrompt: ArmchairShouldPromptClosure) {
         migrateKeysIfNecessary()
         incrementUseCount()
-        showPrompt(shouldPrompt)
+        showPrompt(by: presentingController, shouldPrompt: shouldPrompt)
     }
     
-    fileprivate func incrementSignificantEventAndRate(_ canPromptForRating: Bool) {
+    fileprivate func incrementSignificantEventAndRate(presentingBy presentingController: UIViewController?, canPromptForRating: Bool) {
         migrateKeysIfNecessary()
         incrementSignificantEventCount()
-        showPrompt(ifNecessary: canPromptForRating)
+        showPrompt(by: presentingController, ifNecessary: canPromptForRating)
     }
     
-    fileprivate func incrementSignificantEventAndRate(_ shouldPrompt: ArmchairShouldPromptClosure) {
+    fileprivate func incrementSignificantEventAndRate(presentingBy presentingController: UIViewController?, shouldPrompt: ArmchairShouldPromptClosure) {
         migrateKeysIfNecessary()
         incrementSignificantEventCount()
-        showPrompt(shouldPrompt)
+        showPrompt(by: presentingController, shouldPrompt: shouldPrompt)
     }
     
     fileprivate func incrementUseCount() {
@@ -1061,7 +1061,7 @@ open class Manager : ArmchairManager {
         userDefaultsObject?.synchronize()
     }
     
-    fileprivate func showPrompt(ifNecessary canPromptForRating: Bool) {
+    fileprivate func showPrompt(by presentingController: UIViewController?, ifNecessary canPromptForRating: Bool) {
         if canPromptForRating && connectedToNetwork() && ratingConditionsHaveBeenMet() {
             var shouldPrompt: Bool = true
             
@@ -1077,13 +1077,13 @@ open class Manager : ArmchairManager {
             
             if shouldPrompt {
                 DispatchQueue.main.async {
-                    self.showRatingAlert()
+                    self.showRatingAlert(by: presentingController)
                 }
             }
         }
     }
     
-    fileprivate func showPrompt(_ shouldPrompt: ArmchairShouldPromptClosure) {
+    fileprivate func showPrompt(by presentingController: UIViewController?, shouldPrompt: ArmchairShouldPromptClosure) {
         var shouldPromptVal = false
         
         if Thread.isMainThread {
@@ -1097,14 +1097,14 @@ open class Manager : ArmchairManager {
         
         if (shouldPromptVal) {
             DispatchQueue.main.async {
-                self.showRatingAlert()
+                self.showRatingAlert(by: presentingController)
             }
         }
     }
     
-    fileprivate func showPrompt() {
+    fileprivate func showPrompt(by presentingController: UIViewController?) {
         if !appID.isEmpty && connectedToNetwork() && !userHasDeclinedToRate() && !userHasRatedCurrentVersion() {
-            showRatingAlert()
+            showRatingAlert(by: presentingController)
         }
     }
     
@@ -1204,7 +1204,7 @@ open class Manager : ArmchairManager {
         return (daysBeforeReminding > 0 && remindButtonTitle != nil)
     }
     
-    fileprivate func showRatingAlert() {
+    fileprivate func showRatingAlert(by presentingController: UIViewController?) {
         if let customClosure = customAlertClosure {
             customClosure({[weak self] in self?._rateApp()}, {[weak self] in self?.remindMeLater()}, {[weak self] in self?.dontRate()})
             if let closure = self.didDisplayAlertClosure {
@@ -1239,8 +1239,8 @@ open class Manager : ArmchairManager {
                     }))
                     
                     // get the top most controller (= the StoreKit Controller) and dismiss it
-                    if let presentingController = UIApplication.shared.keyWindow?.rootViewController {
-                        if let topController = topMostViewController(presentingController) {
+                    if let _presentingController = presentingController ?? UIApplication.shared.keyWindow?.rootViewController {
+                        if let topController = topMostViewController(_presentingController) {
                             topController.present(alertView, animated: usesAnimation) { [weak self] _ in
                                 if let closure = self?.didDisplayAlertClosure {
                                     closure()
